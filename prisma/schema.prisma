@@ -7,11 +7,13 @@ datasource db {
 }
 
 model Organization {
-  id          Int          @id @default(autoincrement())
-  name        String
+  id           Int          @id @default(autoincrement())
+  name         String
+  creatorId    Int          @unique @map("creator_id")
 
-  users       User[]       @relation("UserOrganization")
-  patients    Patient[]    @relation("PatientOrganization")
+  creator      User         @relation("OrganizationCreator", fields: [creatorId], references: [id])
+  users        User[]       @relation("UserOrganization")
+  patients     Patient[]    @relation("PatientOrganization")
 }
 
 model User {
@@ -22,6 +24,7 @@ model User {
   role              String?
   organizationId    Int?             @map("organization_id")
 
+  owner             Organization?    @relation("OrganizationCreator")
   organization      Organization?    @relation("UserOrganization", fields: [organizationId], references: [id])
   appointments      Appointment[]    @relation("UserAppointment")
 }
