@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Organization {
+  id          Int          @id @default(autoincrement())
+  name        String
+
+  users       User[]       @relation("UserOrganization")
+  patients    Patient[]    @relation("PatientOrganization")
+}
+
+model User {
+  id                Int              @id @default(autoincrement())
+  name              String
+  email             String           @unique
+  password          String
+  role              String?
+  organizationId    Int?             @map("organization_id")
+
+  organization      Organization?    @relation("UserOrganization", fields: [organizationId], references: [id])
+  appointments      Appointment[]    @relation("UserAppointment")
+}
+
+model Patient {
+  id                Int              @id @default(autoincrement())
+  name              String
+  email             String
+  phoneNumber       String           @map("phone_number")
+  organizationId    Int              @map("organization_id")
+
+  organization      Organization     @relation("PatientOrganization", fields: [organizationId], references: [id])
+  appointments      Appointment[]    @relation("PatientAppointment")
+}
+
+model Appointment {
+  id             Int         @id @default(autoincrement())
+  startDate      DateTime    @map("start_date")
+  endDate        DateTime    @map("end_date")
+  patientId      Int         @map("patient_id")
+  therapistId    Int         @map("therapist_id")
+
+  patient        Patient     @relation("PatientAppointment", fields: [patientId], references: [id])
+  therapist      User        @relation("UserAppointment", fields: [therapistId], references: [id])
+}
