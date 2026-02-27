@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -22,7 +21,6 @@ import { UpdateRoleDto } from './dto/update-role.dto';
 import { UserDto } from 'src/user/dto/user.dto';
 
 @UseGuards(AuthGuard('jwt'))
-@UseGuards(RolesGuard)
 @Controller(`${URL_PREFIX}/organizations`)
 export class OrganizationController {
   constructor(private readonly organizationService: OrganizationService) {}
@@ -36,23 +34,23 @@ export class OrganizationController {
     return this.organizationService.create(organizationData, user);
   }
 
-  @Get()
+  @UseGuards(RolesGuard)
+  @Get('mine')
   async getMyOrganization(@Req() req: Request): Promise<OrganizationDto> {
     const user = req.user as User;
     return this.organizationService.getMyOrganization(user);
   }
 
-  @Put('role')
   @Roles(UserRole.ADMIN)
+  @UseGuards(RolesGuard)
+  @Put('role')
   async updateUserRole(
     @Req() req: Request,
     @Body() roleData: UpdateRoleDto,
   ): Promise<UserDto> {
     const user = req.user as User;
-    if (!user.organizationId)
-      throw new BadRequestException('You have not created an organization');
     return this.organizationService.updateUserRole(
-      user.organizationId,
+      user.organizationId!,
       roleData.userId,
       roleData.role,
     );

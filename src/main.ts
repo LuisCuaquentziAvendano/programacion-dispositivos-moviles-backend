@@ -12,4 +12,4 @@ async function bootstrap(): Promise<void> {
   const port = configService.getOrThrow<number>('PORT');
   await app.listen(port);
 }
-bootstrap();
+void bootstrap();

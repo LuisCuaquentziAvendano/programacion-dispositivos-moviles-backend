@@ -49,18 +49,13 @@ export class UserService {
     return formatUser(user);
   }
 
-  async getById(id: number, organizationId: number | null): Promise<UserDto> {
-    if (!organizationId) throw new NotFoundException('User not found');
+  async getById(id: number, organizationId: number): Promise<UserDto> {
     const user = await this.userDbService.getById(id, organizationId);
     if (!user) throw new NotFoundException('User not found');
     return formatUser(user);
   }
 
-  async getByQuery(
-    query: string,
-    organizationId: number | null,
-  ): Promise<UserDto[]> {
-    if (!organizationId) return [];
+  async getByQuery(query: string, organizationId: number): Promise<UserDto[]> {
     const users = await this.userDbService.getByQuery(query, organizationId);
     return users.map((user) => formatUser(user));
   }

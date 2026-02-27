@@ -23,7 +23,6 @@ import { RolesGuard } from 'src/user/guards/roles.guard';
 import { UserRole } from 'src/utils/user-role';
 import { Roles } from './guards/roles.decorator';
 
-@UseGuards(RolesGuard)
 @Controller(`${URL_PREFIX}/users`)
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -33,8 +32,8 @@ export class UserController {
     return this.userService.signup(userData);
   }
 
-  @Post('login')
   @HttpCode(HttpStatus.OK)
+  @Post('login')
   async login(@Body() userData: LoginDto): Promise<JwtTokenDto> {
     return this.userService.login(userData);
   }
@@ -48,20 +47,22 @@ export class UserController {
 
   @UseGuards(AuthGuard('jwt'))
   @Roles(UserRole.ADMIN, UserRole.SECRETARY)
+  @UseGuards(RolesGuard)
   @Get(':id')
   async getById(@Req() req: Request, @Param() id: number): Promise<UserDto> {
     const user = req.user as User;
-    return this.userService.getById(id, user.organizationId);
+    return this.userService.getById(id, user.organizationId!);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Roles(UserRole.ADMIN, UserRole.SECRETARY)
+  @UseGuards(RolesGuard)
   @Get()
   async getByQuery(
     @Req() req: Request,
     @Query('query') query: string,
   ): Promise<UserDto[]> {
     const user = req.user as User;
-    return this.userService.getByQuery(query, user.organizationId);
+    return this.userService.getByQuery(query, user.organizationId!);
   }
 }
