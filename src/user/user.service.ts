@@ -1,15 +1,18 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SignupDto } from './dto/signup.dto';
-import { UserDbService } from 'src/database/user.service';
+import { UserDbService } from 'src/database/user-db.service';
 import { JwtTokenDto } from './dto/jwt-token.dto';
 import { compare, hash } from 'bcrypt';
 import { JwtPayloadDto } from './dto/jwt-payload.dto';
 import { LoginDto } from './dto/login.dto';
+import { User } from '@prisma/client';
+import { formatUser, UserDto } from './dto/user.dto';
 
 @Injectable()
 export class UserService {
@@ -40,5 +43,25 @@ export class UserService {
     if (!validPassword) throw new UnauthorizedException();
     const payload: JwtPayloadDto = { userId: user.id };
     return { authorization: this.jwtService.sign(payload) };
+  }
+
+  getMyData(user: User): UserDto {
+    return formatUser(user);
+  }
+
+  async getById(id: number, organizationId: number | null): Promise<UserDto> {
+    if (!organizationId) throw new NotFoundException('User not found');
+    const user = await this.userDbService.getById(id, organizationId);
+    if (!user) throw new NotFoundException('User not found');
+    return formatUser(user);
+  }
+
+  async getByQuery(
+    query: string,
+    organizationId: number | null,
+  ): Promise<UserDto[]> {
+    if (!organizationId) return [];
+    const users = await this.userDbService.getByQuery(query, organizationId);
+    return users.map((user) => formatUser(user));
   }
 }

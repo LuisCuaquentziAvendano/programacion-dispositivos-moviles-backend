@@ -4,7 +4,9 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -17,7 +19,11 @@ import type { Request } from 'express';
 import { UserDto } from './dto/user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from '@prisma/client';
+import { RolesGuard } from 'src/user/guards/roles.guard';
+import { UserRole } from 'src/utils/user-role';
+import { Roles } from './guards/roles.decorator';
 
+@UseGuards(RolesGuard)
 @Controller(`${URL_PREFIX}/users`)
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -35,11 +41,27 @@ export class UserController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('me')
-  getData(@Req() req: Request): UserDto {
+  getMyData(@Req() req: Request): UserDto {
     const user = req.user as User;
-    return {
-      email: user.email,
-      name: user.name,
-    };
+    return this.userService.getMyData(user);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Roles(UserRole.ADMIN, UserRole.SECRETARY)
+  @Get(':id')
+  async getById(@Req() req: Request, @Param() id: number): Promise<UserDto> {
+    const user = req.user as User;
+    return this.userService.getById(id, user.organizationId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Roles(UserRole.ADMIN, UserRole.SECRETARY)
+  @Get()
+  async getByQuery(
+    @Req() req: Request,
+    @Query('query') query: string,
+  ): Promise<UserDto[]> {
+    const user = req.user as User;
+    return this.userService.getByQuery(query, user.organizationId);
   }
 }
