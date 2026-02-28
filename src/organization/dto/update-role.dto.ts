@@ -1,4 +1,4 @@
-import { IsString, IsEnum, IsInt, IsPositive } from 'class-validator';
+import { IsString, IsInt, IsPositive, IsIn } from 'class-validator';
 import { UserRole } from 'src/utils/user-role';
 
 export class UpdateRoleDto {
@@ -7,6 +7,6 @@ export class UpdateRoleDto {
   userId: number;
 
   @IsString()
-  @IsEnum([UserRole.SECRETARY, UserRole.THERAPIST])
+  @IsIn([UserRole.SECRETARY, UserRole.THERAPIST])
   role: UserRole;
 }

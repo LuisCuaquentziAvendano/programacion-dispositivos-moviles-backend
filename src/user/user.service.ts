@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -50,13 +49,20 @@ export class UserService {
   }
 
   async getById(id: number, organizationId: number): Promise<UserDto> {
-    const user = await this.userDbService.getById(id, organizationId);
-    if (!user) throw new NotFoundException('User not found');
+    const user = await this.userDbService.getByIdOrThrow(id, organizationId);
     return formatUser(user);
   }
 
-  async getByQuery(query: string, organizationId: number): Promise<UserDto[]> {
-    const users = await this.userDbService.getByQuery(query, organizationId);
+  async getByQuery(
+    query: string,
+    role: string,
+    organizationId: number,
+  ): Promise<UserDto[]> {
+    const users = await this.userDbService.getByQuery(
+      query,
+      role,
+      organizationId,
+    );
     return users.map((user) => formatUser(user));
   }
 }

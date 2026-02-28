@@ -22,6 +22,7 @@ import { User } from '@prisma/client';
 import { RolesGuard } from 'src/user/guards/roles.guard';
 import { UserRole } from 'src/utils/user-role';
 import { Roles } from './guards/roles.decorator';
+import { IdParamDto } from 'src/utils/id.dto';
 
 @Controller(`${URL_PREFIX}/users`)
 export class UserController {
@@ -45,24 +46,26 @@ export class UserController {
     return this.userService.getMyData(user);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SECRETARY)
-  @UseGuards(RolesGuard)
   @Get(':id')
-  async getById(@Req() req: Request, @Param() id: number): Promise<UserDto> {
+  async getById(
+    @Req() req: Request,
+    @Param() param: IdParamDto,
+  ): Promise<UserDto> {
     const user = req.user as User;
-    return this.userService.getById(id, user.organizationId!);
+    return this.userService.getById(param.id, user.organizationId!);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SECRETARY)
-  @UseGuards(RolesGuard)
   @Get()
   async getByQuery(
     @Req() req: Request,
     @Query('query') query: string,
+    @Query('role') role: string,
   ): Promise<UserDto[]> {
     const user = req.user as User;
-    return this.userService.getByQuery(query, user.organizationId!);
+    return this.userService.getByQuery(query, role, user.organizationId!);
   }
 }

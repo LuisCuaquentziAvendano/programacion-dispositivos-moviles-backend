@@ -1,49 +1,59 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from './database.service';
 import { Prisma, User } from '@prisma/client';
-import { someFieldContainsQuery } from 'src/utils/prisma-query-builder';
+import { someFieldContainsQuery } from 'src/utils/database-query-builder';
 import { UserRole } from 'src/utils/user-role';
-import { formatUser, UserDto } from 'src/user/dto/user.dto';
 
 @Injectable()
 export class UserDbService {
-  constructor(private readonly prisma: DatabaseService) {}
+  constructor(private readonly databaseService: DatabaseService) {}
 
   async create(userData: Prisma.UserCreateInput): Promise<User> {
-    const user = await this.prisma.user.create({
+    const user = await this.databaseService.user.create({
       data: userData,
     });
     return user;
   }
 
   async getByEmail(email: string): Promise<User | null> {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.databaseService.user.findUnique({
       where: { email },
     });
     return user;
   }
 
   async getById(userId: number, organizationId?: number): Promise<User | null> {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.databaseService.user.findUnique({
       where: { id: userId, organizationId },
     });
     return user;
   }
 
-  async getByQuery(query: string, organizationId: number): Promise<User[]> {
-    const users = await this.prisma.user.findMany({
-      where: {
-        AND: [
-          { organizationId },
-          someFieldContainsQuery(['name', 'email'], query),
-        ],
-      },
+  async getByIdOrThrow(userId: number, organizationId?: number): Promise<User> {
+    const user = await this.getById(userId, organizationId);
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
+  async getByQuery(
+    query: string,
+    role: string,
+    organizationId: number,
+  ): Promise<User[]> {
+    const databaseQuery: Prisma.UserWhereInput = {
+      organizationId,
+    };
+    if (query)
+      databaseQuery.OR = someFieldContainsQuery(['name', 'email'], query);
+    if (role) databaseQuery.role = role;
+    const users = await this.databaseService.user.findMany({
+      where: databaseQuery,
     });
     return users;
   }
 
   async getOrganizationOwner(organizationId: number): Promise<User> {
-    const user = await this.prisma.user.findFirst({
+    const user = await this.databaseService.user.findFirst({
       where: {
         organizationId,
         role: UserRole.ADMIN,
@@ -56,14 +66,14 @@ export class UserDbService {
     organizationId: number,
     userId: number,
     role: UserRole,
-  ): Promise<UserDto> {
-    const user = await this.prisma.user.update({
+  ): Promise<User> {
+    const user = await this.databaseService.user.update({
       data: {
         organizationId,
         role,
       },
       where: { id: userId },
     });
-    return formatUser(user);
+    return user;
   }
 }

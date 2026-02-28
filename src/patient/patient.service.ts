@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PatientDbService } from 'src/database/patient-db.service';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { formatPatient, PatientDto } from './dto/patient.dto';
@@ -22,11 +22,10 @@ export class PatientService {
     patientId: number,
     organizationId: number,
   ): Promise<PatientDto> {
-    const patient = await this.patientDbService.getById(
+    const patient = await this.patientDbService.getByIdOrThrow(
       patientId,
       organizationId,
     );
-    if (!patient) throw new NotFoundException('Patient not found');
     return formatPatient(patient);
   }
 

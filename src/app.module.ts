@@ -6,6 +6,7 @@ import { UserModule } from './user/user.module';
 import { DatabaseModule } from './database/database.module';
 import { OrganizationModule } from './organization/organization.module';
 import { PatienModule } from './patient/patient.module';
+import { AppointmentModule } from './appointment/appointment.module';
 
 @Module({
   controllers: [AppController],
@@ -15,6 +16,7 @@ import { PatienModule } from './patient/patient.module';
     UserModule,
     OrganizationModule,
     PatienModule,
+    AppointmentModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

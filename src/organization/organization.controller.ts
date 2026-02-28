@@ -41,8 +41,8 @@ export class OrganizationController {
     return this.organizationService.getMyOrganization(user);
   }
 
-  @Roles(UserRole.ADMIN)
   @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Put('role')
   async updateUserRole(
     @Req() req: Request,

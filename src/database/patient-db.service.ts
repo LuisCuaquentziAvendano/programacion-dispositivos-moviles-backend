@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from './database.service';
 import { Patient, Prisma } from '@prisma/client';
-import { someFieldContainsQuery } from 'src/utils/prisma-query-builder';
+import { someFieldContainsQuery } from 'src/utils/database-query-builder';
 
 @Injectable()
 export class PatientDbService {
-  constructor(private readonly prisma: DatabaseService) {}
+  constructor(private readonly databaseService: DatabaseService) {}
 
   async create(patientData: Prisma.PatientCreateInput): Promise<Patient> {
-    const patient = await this.prisma.patient.create({
+    const patient = await this.databaseService.patient.create({
       data: patientData,
     });
     return patient;
@@ -18,20 +18,32 @@ export class PatientDbService {
     patientId: number,
     organizationId: number,
   ): Promise<Patient | null> {
-    const patient = await this.prisma.patient.findUnique({
+    const patient = await this.databaseService.patient.findUnique({
       where: { id: patientId, organizationId },
     });
     return patient;
   }
 
+  async getByIdOrThrow(
+    patientId: number,
+    organizationId: number,
+  ): Promise<Patient> {
+    const patient = await this.getById(patientId, organizationId);
+    if (!patient) throw new NotFoundException('Patient not found');
+    return patient;
+  }
+
   async getByQuery(query: string, organizationId: number): Promise<Patient[]> {
-    const patients = await this.prisma.patient.findMany({
-      where: {
-        AND: [
-          { organizationId },
-          someFieldContainsQuery(['name', 'email', 'phoneNumber'], query),
-        ],
-      },
+    const databaseQuery: Prisma.PatientWhereInput = {
+      organizationId,
+    };
+    if (query)
+      databaseQuery.OR = someFieldContainsQuery(
+        ['name', 'email', 'phoneNumber'],
+        query,
+      );
+    const patients = await this.databaseService.patient.findMany({
+      where: databaseQuery,
     });
     return patients;
   }

@@ -7,11 +7,12 @@ datasource db {
 }
 
 model Organization {
-  id           Int          @id @default(autoincrement())
-  name         String
+  id              Int              @id @default(autoincrement())
+  name            String
 
-  users        User[]       @relation("UserOrganization")
-  patients     Patient[]    @relation("PatientOrganization")
+  users           User[]           @relation("UserOrganization")
+  patients        Patient[]        @relation("PatientOrganization")
+  appointments    Appointment[]    @relation("AppointmentOrganization")
 }
 
 model User {
@@ -38,12 +39,14 @@ model Patient {
 }
 
 model Appointment {
-  id             Int         @id @default(autoincrement())
-  startDate      DateTime    @map("start_date")
-  endDate        DateTime    @map("end_date")
-  patientId      Int         @map("patient_id")
-  therapistId    Int         @map("therapist_id")
+  id                Int             @id @default(autoincrement())
+  startDate         DateTime        @map("start_date")
+  endDate           DateTime        @map("end_date")
+  patientId         Int             @map("patient_id")
+  therapistId       Int             @map("therapist_id")
+  organizationId    Int             @map("organization_id")
 
-  patient        Patient     @relation("PatientAppointment", fields: [patientId], references: [id])
-  therapist      User        @relation("UserAppointment", fields: [therapistId], references: [id])
+  patient           Patient         @relation("PatientAppointment", fields: [patientId], references: [id])
+  therapist         User            @relation("UserAppointment", fields: [therapistId], references: [id])
+  organization      Organization    @relation("AppointmentOrganization", fields: [organizationId], references: [id])
 }

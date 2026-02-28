@@ -18,9 +18,9 @@ import { User } from '@prisma/client';
 import type { Request } from 'express';
 import { Roles } from 'src/user/guards/roles.decorator';
 import { UserRole } from 'src/utils/user-role';
+import { IdParamDto } from 'src/utils/id.dto';
 
-@UseGuards(AuthGuard('jwt'))
-@UseGuards(RolesGuard)
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller(`${URL_PREFIX}/patients`)
 export class PatientController {
   constructor(private readonly patientService: PatientService) {}
@@ -38,10 +38,10 @@ export class PatientController {
   @Get(':id')
   async getById(
     @Req() req: Request,
-    @Param() patientId: number,
+    @Param() param: IdParamDto,
   ): Promise<PatientDto> {
     const user = req.user as User;
-    return this.patientService.getById(patientId, user.organizationId!);
+    return this.patientService.getById(param.id, user.organizationId!);
   }
 
   @Get()
