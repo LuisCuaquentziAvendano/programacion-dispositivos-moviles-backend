@@ -7,7 +7,7 @@ import { UserRole } from '../src/utils/user-role';
 const ORGANIZATIONS = 5;
 const USERS = 200;
 const PATIENTS = 200;
-const APPOINTMENTS = 100;
+const APPOINTMENTS = 500;
 type PromiseFunction = (i: number) => Promise<void>;
 const PASSWORD_HASH = hashSync('SafePassword123!', 10);
 
@@ -127,9 +127,14 @@ function randomFromArray<T>(array: T[]): T {
 }
 
 function randomDateInterval(i: number): [Date, Date] {
+  const durations = [15, 30, 45, 60];
+  const maxDuration = Math.max(...durations);
+  const interval = 2 * maxDuration * 60 * 1000;
   const now = new Date().getTime();
-  const MS_BEFORE = (3 * APPOINTMENTS - 2 * i) * (60 * 60 * 1000);
-  const startDate = randomInt(now - MS_BEFORE, now);
-  const endDate = startDate + randomFromArray([15, 30, 45, 60]) * 60 * 1000;
+  const startDate = randomInt(
+    now - interval * (i + 1),
+    now - interval * i - Math.floor(interval / 2),
+  );
+  const endDate = startDate + randomFromArray(durations) * 60 * 1000;
   return [new Date(startDate), new Date(endDate)];
 }
