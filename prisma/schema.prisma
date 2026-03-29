@@ -13,6 +13,7 @@ model Organization {
   users           User[]           @relation("UserOrganization")
   patients        Patient[]        @relation("PatientOrganization")
   appointments    Appointment[]    @relation("AppointmentOrganization")
+  services        Service[]        @relation("ServiceOrganization")
 }
 
 model User {
@@ -45,8 +46,20 @@ model Appointment {
   patientId         Int             @map("patient_id")
   therapistId       Int             @map("therapist_id")
   organizationId    Int             @map("organization_id")
+  serviceId         Int?            @map("service_id")
 
   patient           Patient         @relation("PatientAppointment", fields: [patientId], references: [id])
   therapist         User            @relation("UserAppointment", fields: [therapistId], references: [id])
   organization      Organization    @relation("AppointmentOrganization", fields: [organizationId], references: [id])
+  service           Service?        @relation("ServiceAppointment", fields: [serviceId], references: [id])
+}
+
+model Service {
+  id                Int             @id @default(autoincrement())
+  name              String
+  duration          Int
+  organizationId    Int             @map("organization_id")
+
+  organization      Organization    @relation("ServiceOrganization", fields: [organizationId], references: [id])
+  appointments      Appointment[]   @relation("ServiceAppointment")
 }

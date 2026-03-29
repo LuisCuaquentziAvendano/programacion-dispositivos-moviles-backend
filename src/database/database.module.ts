@@ -4,6 +4,7 @@ import { UserDbService } from './user-db.service';
 import { OrganizationDbService } from './organization-db.service';
 import { PatientDbService } from './patient-db.service';
 import { AppointmentDbService } from './appointment-db.service';
+import { ServiceDbService } from './service-db.service';
 
 @Module({
   providers: [
@@ -12,12 +13,14 @@ import { AppointmentDbService } from './appointment-db.service';
     OrganizationDbService,
     PatientDbService,
     AppointmentDbService,
+    ServiceDbService,
   ],
   exports: [
     UserDbService,
     OrganizationDbService,
     PatientDbService,
     AppointmentDbService,
+    ServiceDbService,
   ],
 })
 export class DatabaseModule {}

@@ -1,4 +1,4 @@
-import { IsDateString, IsInt, IsPositive } from 'class-validator';
+import { IsDateString, IsInt, IsOptional, IsPositive } from 'class-validator';
 
 export class CreateAppointmentDto {
   @IsInt()
@@ -8,6 +8,11 @@ export class CreateAppointmentDto {
   @IsInt()
   @IsPositive()
   therapistId: number;
+
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  serviceId?: number;
 
   @IsDateString()
   startDate: Date;

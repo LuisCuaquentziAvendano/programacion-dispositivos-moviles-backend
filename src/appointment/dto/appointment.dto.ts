@@ -1,6 +1,7 @@
-import { Appointment, Patient, User } from '@prisma/client';
+import { Appointment, Patient, Service, User } from '@prisma/client';
 import { formatPatient, PatientDto } from 'src/patient/dto/patient.dto';
 import { formatUser, UserDto } from 'src/user/dto/user.dto';
+import { formatService, ServiceDto } from 'src/service/dto/service.dto';
 
 export class AppointmentDto {
   id: number;
@@ -8,12 +9,14 @@ export class AppointmentDto {
   endDate: Date;
   patient: PatientDto;
   therapist: UserDto;
+  service: ServiceDto | null;
 }
 
 export function formatAppointment(
   appointment: Appointment,
   patient: Patient,
   therapist: User,
+  service: Service | null,
 ): AppointmentDto {
   return {
     id: appointment.id,
@@ -21,5 +24,6 @@ export function formatAppointment(
     endDate: appointment.endDate,
     patient: formatPatient(patient),
     therapist: formatUser(therapist),
+    service: service ? formatService(service) : null,
   };
 }

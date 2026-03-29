@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from './database.service';
-import { Appointment, Patient, Prisma, User } from '@prisma/client';
+import { Appointment, Patient, Prisma, Service, User } from '@prisma/client';
 
 @Injectable()
 export class AppointmentDbService {
@@ -27,8 +27,10 @@ export class AppointmentDbService {
         patientId: true,
         therapistId: true,
         organizationId: true,
+        serviceId: true,
         patient: true,
         therapist: true,
+        service: true,
       },
       where: { id: appointmentId, organizationId },
     });
@@ -72,8 +74,10 @@ export class AppointmentDbService {
         patientId: true,
         therapistId: true,
         organizationId: true,
+        serviceId: true,
         patient: true,
         therapist: true,
+        service: true,
       },
       where: databaseQuery,
       orderBy: [{ startDate: 'asc' }, { endDate: 'asc' }],
@@ -85,6 +89,7 @@ export class AppointmentDbService {
 type AppointmentExtended = Appointment & {
   patient: Patient;
   therapist: User;
+  service: Service | null;
 };
 
 class QueryAppointment {

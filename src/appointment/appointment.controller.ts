@@ -61,7 +61,7 @@ export class AppointmentController {
   }
 
   @Get(':id')
-  async getAppointmentById(
+  async getById(
     @Req() req: Request,
     @Param() param: IdParamDto,
   ): Promise<AppointmentDto> {
@@ -71,7 +71,7 @@ export class AppointmentController {
 
   @Roles(UserRole.ADMIN, UserRole.SECRETARY)
   @Get()
-  async getTherapistAppointments(
+  async getByQuery(
     @Req() req: Request,
     @Query() query: QueryAppointmentsDto,
   ): Promise<AppointmentDto[]> {

@@ -10,6 +10,7 @@ import { AppointmentDbService } from 'src/database/appointment-db.service';
 import { UserDbService } from 'src/database/user-db.service';
 import { UserRole } from 'src/utils/user-role';
 import { QueryAppointmentsDto } from './dto/query-appointments.dto';
+import { ServiceDbService } from 'src/database/service-db.service';
 
 @Injectable()
 export class AppointmentService {
@@ -17,6 +18,7 @@ export class AppointmentService {
     private readonly appointmentDbService: AppointmentDbService,
     private readonly patientDbService: PatientDbService,
     private readonly userDbService: UserDbService,
+    private readonly serviceDbService: ServiceDbService,
   ) {}
 
   async create(
@@ -31,6 +33,12 @@ export class AppointmentService {
       appointmentData.therapistId,
       organizationId,
     );
+    const service = appointmentData.serviceId
+      ? await this.serviceDbService.getByIdOrThrow(
+          appointmentData.serviceId,
+          organizationId,
+        )
+      : null;
     if (therapist.role != UserRole.THERAPIST)
       throw new BadRequestException('The user must be a therapist');
     if (appointmentData.startDate >= appointmentData.endDate)
@@ -43,8 +51,11 @@ export class AppointmentService {
       patient: { connect: { id: appointmentData.patientId } },
       therapist: { connect: { id: appointmentData.therapistId } },
       organization: { connect: { id: organizationId } },
+      ...(appointmentData.serviceId
+        ? { service: { connect: { id: appointmentData.serviceId } } }
+        : {}),
     });
-    return formatAppointment(appointment, patient, therapist);
+    return formatAppointment(appointment, patient, therapist, service);
   }
 
   async getById(
@@ -60,6 +71,7 @@ export class AppointmentService {
       appointment,
       appointment.patient,
       appointment.therapist,
+      appointment.service,
     );
   }
 
@@ -91,6 +103,7 @@ export class AppointmentService {
         appointment,
         appointment.patient,
         appointment.therapist,
+        appointment.service,
       ),
     );
   }
