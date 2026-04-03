@@ -17,6 +17,11 @@ export class SignupDto {
   @MaxLength(MAX_STRING_SIZE)
   email: string;
 
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(MAX_STRING_SIZE)
+  phoneNumber: string;
+
   @IsStrongPassword()
   @MaxLength(MAX_STRING_SIZE)
   password: string;

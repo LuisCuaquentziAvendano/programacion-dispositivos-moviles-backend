@@ -7,6 +7,7 @@ export class AppointmentDto {
   id: number;
   startDate: Date;
   endDate: Date;
+  notes: string;
   patient: PatientDto;
   therapist: UserDto;
   service: ServiceDto | null;
@@ -22,6 +23,7 @@ export function formatAppointment(
     id: appointment.id,
     startDate: appointment.startDate,
     endDate: appointment.endDate,
+    notes: appointment.notes,
     patient: formatPatient(patient),
     therapist: formatUser(therapist),
     service: service ? formatService(service) : null,

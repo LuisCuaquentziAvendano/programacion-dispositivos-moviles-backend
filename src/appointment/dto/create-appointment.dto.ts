@@ -1,4 +1,12 @@
-import { IsDateString, IsInt, IsOptional, IsPositive } from 'class-validator';
+import {
+  IsDateString,
+  IsInt,
+  IsOptional,
+  IsPositive,
+  IsString,
+  MaxLength,
+} from 'class-validator';
+import { MAX_STRING_SIZE } from 'src/utils/variables';
 
 export class CreateAppointmentDto {
   @IsInt()
@@ -19,4 +27,9 @@ export class CreateAppointmentDto {
 
   @IsDateString()
   endDate: Date;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(MAX_STRING_SIZE)
+  notes?: string;
 }

@@ -3,7 +3,7 @@ import { Patient } from '@prisma/client';
 export class PatientDto {
   id: number;
   email: string | null;
-  name: string | null;
+  name: string;
   phoneNumber: string | null;
 }
 

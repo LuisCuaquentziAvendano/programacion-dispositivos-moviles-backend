@@ -24,6 +24,7 @@ export class AppointmentDbService {
         id: true,
         startDate: true,
         endDate: true,
+        notes: true,
         patientId: true,
         therapistId: true,
         organizationId: true,
@@ -71,6 +72,7 @@ export class AppointmentDbService {
         id: true,
         startDate: true,
         endDate: true,
+        notes: true,
         patientId: true,
         therapistId: true,
         organizationId: true,
@@ -83,6 +85,18 @@ export class AppointmentDbService {
       orderBy: [{ startDate: 'asc' }, { endDate: 'asc' }],
     });
     return appointments;
+  }
+
+  async updateNotes(
+    appointmentId: number,
+    organizationId: number,
+    notes: string,
+  ): Promise<Appointment> {
+    const appointment = await this.databaseService.appointment.update({
+      data: { notes },
+      where: { id: appointmentId, organizationId },
+    });
+    return appointment;
   }
 }
 

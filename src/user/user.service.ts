@@ -29,6 +29,7 @@ export class UserService {
     const user = await this.userDbService.create({
       email: userData.email,
       name: userData.name,
+      phoneNumber: userData.phoneNumber,
       password: passwordHash,
     });
     const payload: JwtPayloadDto = { userId: user.id };

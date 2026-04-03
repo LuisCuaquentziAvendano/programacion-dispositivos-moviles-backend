@@ -7,6 +7,7 @@ import { UserRole } from '../src/utils/user-role';
 const ORGANIZATIONS = 5;
 const USERS = 200;
 const PATIENTS = 200;
+const SERVICES = 100;
 const APPOINTMENTS = 500;
 type PromiseFunction = (i: number) => Promise<void>;
 const PASSWORD_HASH = hashSync('SafePassword123!', 10);
@@ -30,6 +31,7 @@ async function main(): Promise<void> {
   await seedOrganizations();
   await seedUsers();
   await seedPatients();
+  await seedServices();
   await seedAppointments();
   console.log('Seed completed');
 }
@@ -40,6 +42,7 @@ async function seedOrganizations(): Promise<void> {
       data: {
         name: `Admin User ${i}`,
         email: `admin.user${i}@test.com`,
+        phoneNumber: `+52 10000000${i}`,
         password: PASSWORD_HASH,
         role: UserRole.ADMIN,
         organization: { create: { name: `Organization ${i}` } },
@@ -55,6 +58,7 @@ async function seedUsers(): Promise<void> {
       data: {
         name: `User ${i}`,
         email: `user${i}@test.com`,
+        phoneNumber: `+52 20000000${i}`,
         password: PASSWORD_HASH,
         organizationId: randomInt(1, ORGANIZATIONS),
         role: randomFromArray([UserRole.SECRETARY, UserRole.THERAPIST]),
@@ -78,11 +82,26 @@ async function seedPatients(): Promise<void> {
   await promiseBatch(PATIENTS, createPatient);
 }
 
+async function seedServices(): Promise<void> {
+  const durations = [30, 45, 60, 90];
+  const createService: PromiseFunction = async (i) => {
+    await prisma.service.create({
+      data: {
+        name: `Service ${i}`,
+        duration: randomFromArray(durations),
+        organizationId: randomInt(1, ORGANIZATIONS),
+      },
+    });
+  };
+  await promiseBatch(SERVICES, createService);
+}
+
 async function seedAppointments(): Promise<void> {
   const patients = await prisma.patient.findMany();
   const therapists = await prisma.user.findMany({
     where: { role: UserRole.THERAPIST },
   });
+  const services = await prisma.service.findMany();
   const createAppointment: PromiseFunction = async (i) => {
     const orgaId = randomInt(1, ORGANIZATIONS);
     const patientsInOrga = patients
@@ -91,13 +110,22 @@ async function seedAppointments(): Promise<void> {
     const therapistsInOrga = therapists
       .filter((t) => t.organizationId == orgaId && t.role == UserRole.THERAPIST)
       .map((t) => t.id);
+    const servicesInOrga = services
+      .filter((s) => s.organizationId == orgaId)
+      .map((s) => s.id);
     if (patientsInOrga.length == 0 || therapistsInOrga.length == 0) return;
     const [startDate, endDate] = randomDateInterval(i);
+    const serviceId =
+      servicesInOrga.length > 0 && randomInt(0, 1)
+        ? randomFromArray(servicesInOrga)
+        : null;
     await prisma.appointment.create({
       data: {
         patientId: randomFromArray(patientsInOrga),
         therapistId: randomFromArray(therapistsInOrga),
         organizationId: orgaId,
+        notes: '',
+        serviceId,
         startDate,
         endDate,
       },

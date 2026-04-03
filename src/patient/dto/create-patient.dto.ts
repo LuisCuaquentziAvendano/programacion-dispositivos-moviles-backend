@@ -13,11 +13,10 @@ export class CreatePatientDto {
   @MaxLength(MAX_STRING_SIZE)
   email: string | null;
 
-  @IsOptional()
   @IsString()
   @IsNotEmpty()
   @MaxLength(MAX_STRING_SIZE)
-  name: string | null;
+  name: string;
 
   @IsOptional()
   @IsString()

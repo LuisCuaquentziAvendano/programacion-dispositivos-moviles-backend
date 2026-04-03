@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Query,
   Req,
   UseGuards,
@@ -20,6 +21,7 @@ import { Roles } from 'src/user/guards/roles.decorator';
 import { UserRole } from 'src/utils/user-role';
 import { QueryAppointmentsDto } from './dto/query-appointments.dto';
 import { IdParamDto } from 'src/utils/id.dto';
+import { UpdateAppointmentNotesDto } from './dto/update-appointment-notes.dto';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller(`${URL_PREFIX}/appointments`)
@@ -84,6 +86,22 @@ export class AppointmentController {
         rangeStart: query.rangeStart,
         rangeEnd: query.rangeEnd,
       },
+      user.organizationId!,
+    );
+  }
+
+  @Roles(UserRole.THERAPIST)
+  @Put(':id/notes')
+  async updateNotes(
+    @Req() req: Request,
+    @Param() param: IdParamDto,
+    @Body() notesData: UpdateAppointmentNotesDto,
+  ): Promise<AppointmentDto> {
+    const user = req.user as User;
+    return await this.appointmentService.updateNotes(
+      param.id,
+      notesData.notes,
+      user.id,
       user.organizationId!,
     );
   }

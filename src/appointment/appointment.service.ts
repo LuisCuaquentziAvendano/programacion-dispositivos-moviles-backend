@@ -48,6 +48,7 @@ export class AppointmentService {
     const appointment = await this.appointmentDbService.create({
       startDate: appointmentData.startDate,
       endDate: appointmentData.endDate,
+      notes: appointmentData.notes || '',
       patient: { connect: { id: appointmentData.patientId } },
       therapist: { connect: { id: appointmentData.therapistId } },
       organization: { connect: { id: organizationId } },
@@ -105,6 +106,40 @@ export class AppointmentService {
         appointment.therapist,
         appointment.service,
       ),
+    );
+  }
+
+  async updateNotes(
+    appointmentId: number,
+    notes: string,
+    therapistId: number,
+    organizationId: number,
+  ): Promise<AppointmentDto> {
+    const appointmentFound = await this.appointmentDbService.getById(
+      appointmentId,
+      organizationId,
+    );
+    if (!appointmentFound) throw new NotFoundException('Appointment not found');
+    if (appointmentFound.therapistId !== therapistId)
+      throw new BadRequestException(
+        'Only the assigned therapist can update appointment notes',
+      );
+    await this.appointmentDbService.updateNotes(
+      appointmentId,
+      organizationId,
+      notes,
+    );
+    const appointmentUpdated = await this.appointmentDbService.getById(
+      appointmentId,
+      organizationId,
+    );
+    if (!appointmentUpdated)
+      throw new NotFoundException('Appointment not found');
+    return formatAppointment(
+      appointmentUpdated,
+      appointmentUpdated.patient,
+      appointmentUpdated.therapist,
+      appointmentUpdated.service,
     );
   }
 
