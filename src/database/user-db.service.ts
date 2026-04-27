@@ -22,6 +22,13 @@ export class UserDbService {
     return user;
   }
 
+  async getByUid(uid: string): Promise<User | null> {
+    const user = await this.databaseService.user.findUnique({
+      where: { uid },
+    });
+    return user;
+  }
+
   async getById(userId: number, organizationId?: number): Promise<User | null> {
     const user = await this.databaseService.user.findUnique({
       where: { id: userId, organizationId },

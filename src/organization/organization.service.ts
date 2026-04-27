@@ -39,14 +39,15 @@ export class OrganizationService {
 
   async updateUserRole(
     organizationId: number,
-    userId: number,
+    userEmail: string,
     role: UserRole,
   ): Promise<UserDto> {
-    const user = await this.userDbService.getByIdOrThrow(userId);
+    const user = await this.userDbService.getByEmail(userEmail);
+    if (!user) throw new BadRequestException('User not found');
     if (user.role) throw new BadRequestException("The role can't be changed");
     const userUpdated = await this.userDbService.updateOrganization(
       organizationId,
-      userId,
+      user.id,
       role,
     );
     return formatUser(userUpdated);

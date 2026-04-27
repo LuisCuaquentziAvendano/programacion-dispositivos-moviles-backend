@@ -1,7 +1,6 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
 import { config } from 'dotenv';
-import { hashSync } from 'bcrypt';
 import { UserRole } from '../src/utils/user-role';
 
 const ORGANIZATIONS = 5;
@@ -10,7 +9,6 @@ const PATIENTS = 200;
 const SERVICES = 100;
 const APPOINTMENTS = 500;
 type PromiseFunction = (i: number) => Promise<void>;
-const PASSWORD_HASH = hashSync('SafePassword123!', 10);
 
 config();
 const adapter = new PrismaPg({
@@ -40,10 +38,10 @@ async function seedOrganizations(): Promise<void> {
   const createOrganizationAndCreator: PromiseFunction = async (i) => {
     await prisma.user.create({
       data: {
+        uid: `firebase-admin-${i}`,
         name: `Admin User ${i}`,
         email: `admin.user${i}@test.com`,
         phoneNumber: `+52 10000000${i}`,
-        password: PASSWORD_HASH,
         role: UserRole.ADMIN,
         organization: { create: { name: `Organization ${i}` } },
       },
@@ -56,10 +54,10 @@ async function seedUsers(): Promise<void> {
   const createUser: PromiseFunction = async (i) => {
     await prisma.user.create({
       data: {
+        uid: `firebase-user-${i}`,
         name: `User ${i}`,
         email: `user${i}@test.com`,
         phoneNumber: `+52 20000000${i}`,
-        password: PASSWORD_HASH,
         organizationId: randomInt(1, ORGANIZATIONS),
         role: randomFromArray([UserRole.SECRETARY, UserRole.THERAPIST]),
       },

@@ -51,7 +51,7 @@ export class OrganizationController {
     const user = req.user as User;
     return this.organizationService.updateUserRole(
       user.organizationId!,
-      roleData.userId,
+      roleData.email,
       roleData.role,
     );
   }
