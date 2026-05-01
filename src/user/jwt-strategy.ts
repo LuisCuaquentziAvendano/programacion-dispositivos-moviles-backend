@@ -27,21 +27,23 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       throw new UnauthorizedException();
     }
 
+    if (!decodedToken.email) throw new UnauthorizedException();
+
     const payload: JwtPayloadDto = { uid: decodedToken.uid };
     let user = await this.userDbService.getByUid(payload.uid);
 
     if (!user) {
-      if (decodedToken.email) {
-        const existingUserByEmail = await this.userDbService.getByEmail(
-          decodedToken.email,
-        );
-        if (existingUserByEmail && existingUserByEmail.uid !== payload.uid)
-          throw new UnauthorizedException();
-      }
+      const existingUserByEmail = await this.userDbService.getByEmail(
+        decodedToken.email,
+      );
+      if (existingUserByEmail && existingUserByEmail.uid !== payload.uid)
+        throw new UnauthorizedException();
+
       user = await this.userDbService.create({
         uid: payload.uid,
         email: decodedToken.email,
-        name: decodedToken.name as string,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        name: decodedToken.name ?? null,
       });
     }
 

@@ -20,7 +20,7 @@ model User {
   id                Int              @id @default(autoincrement())
   uid               String           @unique
   name              String?
-  email             String?          @unique
+  email             String           @unique
   phoneNumber       String?          @map("phone_number")
   role              String?
   organizationId    Int?             @map("organization_id")
