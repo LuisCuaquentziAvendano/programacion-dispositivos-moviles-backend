@@ -11,6 +11,7 @@ import { UserDbService } from 'src/database/user-db.service';
 import { UserRole } from 'src/utils/user-role';
 import { QueryAppointmentsDto } from './dto/query-appointments.dto';
 import { ServiceDbService } from 'src/database/service-db.service';
+import { GoogleCalendarService } from './google-calendar.service';
 
 @Injectable()
 export class AppointmentService {
@@ -19,11 +20,13 @@ export class AppointmentService {
     private readonly patientDbService: PatientDbService,
     private readonly userDbService: UserDbService,
     private readonly serviceDbService: ServiceDbService,
+    private readonly googleCalendarService: GoogleCalendarService,
   ) {}
 
   async create(
     appointmentData: CreateAppointmentDto,
     organizationId: number,
+    googleAccessToken: string | string[] | undefined,
   ): Promise<AppointmentDto> {
     const patient = await this.patientDbService.getByIdOrThrow(
       appointmentData.patientId,
@@ -56,6 +59,19 @@ export class AppointmentService {
         ? { service: { connect: { id: appointmentData.serviceId } } }
         : {}),
     });
+    if (typeof googleAccessToken === 'string' && googleAccessToken.length > 0) {
+      try {
+        await this.googleCalendarService.createEvent(
+          googleAccessToken,
+          service ? service.name : 'Sesión con terapeuta',
+          `Sesión con ${therapist.name}`,
+          appointment.startDate,
+          appointment.endDate,
+        );
+      } catch {
+        // Adding event to Google Calendar failed
+      }
+    }
     return formatAppointment(appointment, patient, therapist, service);
   }
 

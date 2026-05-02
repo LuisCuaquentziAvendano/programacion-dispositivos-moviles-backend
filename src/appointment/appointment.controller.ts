@@ -37,9 +37,11 @@ export class AppointmentController {
     appointmentData.startDate = new Date(appointmentData.startDate);
     appointmentData.endDate = new Date(appointmentData.endDate);
     const user = req.user as User;
+    const googleAccessToken = req.headers['x-google-access-token'];
     return this.appointmentService.create(
       appointmentData,
       user.organizationId!,
+      googleAccessToken,
     );
   }
 
