@@ -60,6 +60,7 @@ export class PatientService {
     if (data.email !== undefined) prismaData.email = data.email;
     if (data.phoneNumber !== undefined)
       prismaData.phoneNumber = data.phoneNumber;
+    if (data.active !== undefined) prismaData.active = data.active;
     if (Object.keys(prismaData).length === 0) return formatPatient(existing);
     const patient = await this.patientDbService.update(patientId, prismaData);
     return formatPatient(patient);

@@ -32,6 +32,7 @@ model User {
 model Patient {
   id                Int              @id @default(autoincrement())
   name              String
+  active            Boolean          @default(true)
   email             String?
   phoneNumber       String?          @map("phone_number")
   organizationId    Int              @map("organization_id")

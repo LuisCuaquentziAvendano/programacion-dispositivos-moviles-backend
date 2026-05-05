@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsEmail,
   IsNotEmpty,
   IsOptional,
@@ -8,6 +9,10 @@ import {
 import { MAX_STRING_SIZE } from 'src/utils/variables';
 
 export class CreatePatientDto {
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean;
+
   @IsOptional()
   @IsEmail()
   @MaxLength(MAX_STRING_SIZE)
