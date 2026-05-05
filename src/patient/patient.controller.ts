@@ -1,8 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   Param,
+  Patch,
   Post,
   Query,
   Req,
@@ -14,6 +17,7 @@ import { URL_PREFIX } from 'src/utils/variables';
 import { PatientService } from './patient.service';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { PatientDto } from './dto/patient.dto';
+import { UpdatePatientDto } from './dto/update-patient.dto';
 import { User } from '@prisma/client';
 import type { Request } from 'express';
 import { Roles } from 'src/user/guards/roles.decorator';
@@ -33,6 +37,32 @@ export class PatientController {
   ): Promise<PatientDto> {
     const user = req.user as User;
     return this.patientService.create(patientData, user.organizationId!);
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.SECRETARY)
+  @Patch(':id')
+  async update(
+    @Req() req: Request,
+    @Param() param: IdParamDto,
+    @Body() patientData: UpdatePatientDto,
+  ): Promise<PatientDto> {
+    const user = req.user as User;
+    return this.patientService.update(
+      param.id,
+      user.organizationId!,
+      patientData,
+    );
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.SECRETARY)
+  @Delete(':id')
+  @HttpCode(204)
+  async delete(
+    @Req() req: Request,
+    @Param() param: IdParamDto,
+  ): Promise<void> {
+    const user = req.user as User;
+    await this.patientService.delete(param.id, user.organizationId!);
   }
 
   @Get(':id')

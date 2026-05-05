@@ -47,4 +47,20 @@ export class PatientDbService {
     });
     return patients;
   }
+
+  async delete(id: number): Promise<void> {
+    await this.databaseService.patient.delete({
+      where: { id },
+    });
+  }
+
+  async update(
+    id: number,
+    data: Prisma.PatientUpdateInput,
+  ): Promise<Patient> {
+    return this.databaseService.patient.update({
+      where: { id },
+      data,
+    });
+  }
 }

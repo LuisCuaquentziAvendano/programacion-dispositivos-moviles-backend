@@ -87,6 +87,12 @@ export class AppointmentDbService {
     return appointments;
   }
 
+  async countByPatientId(patientId: number): Promise<number> {
+    return this.databaseService.appointment.count({
+      where: { patientId },
+    });
+  }
+
   async updateNotes(
     appointmentId: number,
     organizationId: number,
