@@ -36,11 +36,15 @@ async function main(): Promise<void> {
 
 async function seedOrganizations(): Promise<void> {
   const createOrganizationAndCreator: PromiseFunction = async (i) => {
+    const userEmail = process.env.USER_EMAIL;
+    const userUid = process.env.USER_UID;
+    const email = i == 0 && userEmail ? userEmail : `admin.user${i}@test.com`;
+    const uid = i == 0 && userUid ? userUid : `firebase-admin-${i}`;
     await prisma.user.create({
       data: {
-        uid: `firebase-admin-${i}`,
+        uid,
         name: `Admin User ${i}`,
-        email: `admin.user${i}@test.com`,
+        email,
         phoneNumber: `+52 10000000${i}`,
         role: UserRole.ADMIN,
         organization: { create: { name: `Organization ${i}` } },

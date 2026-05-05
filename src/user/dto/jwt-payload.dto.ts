@@ -1,3 +1,3 @@
 export class JwtPayloadDto {
-  uid!: string;
+  uid: string;
 }

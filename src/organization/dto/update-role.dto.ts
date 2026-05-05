@@ -3,9 +3,9 @@ import { UserRole } from 'src/utils/user-role';
 
 export class UpdateRoleDto {
   @IsEmail()
-  email!: string;
+  email: string;
 
   @IsString()
   @IsIn([UserRole.SECRETARY, UserRole.THERAPIST])
-  role!: UserRole;
+  role: UserRole;
 }
