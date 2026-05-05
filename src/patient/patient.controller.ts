@@ -57,10 +57,7 @@ export class PatientController {
   @Roles(UserRole.ADMIN, UserRole.SECRETARY)
   @Delete(':id')
   @HttpCode(204)
-  async delete(
-    @Req() req: Request,
-    @Param() param: IdParamDto,
-  ): Promise<void> {
+  async delete(@Req() req: Request, @Param() param: IdParamDto): Promise<void> {
     const user = req.user as User;
     await this.patientService.delete(param.id, user.organizationId!);
   }

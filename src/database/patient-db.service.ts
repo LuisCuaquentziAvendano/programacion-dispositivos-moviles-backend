@@ -54,10 +54,7 @@ export class PatientDbService {
     });
   }
 
-  async update(
-    id: number,
-    data: Prisma.PatientUpdateInput,
-  ): Promise<Patient> {
+  async update(id: number, data: Prisma.PatientUpdateInput): Promise<Patient> {
     return this.databaseService.patient.update({
       where: { id },
       data,
