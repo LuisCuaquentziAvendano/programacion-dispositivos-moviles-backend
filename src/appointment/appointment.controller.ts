@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -22,6 +24,7 @@ import { UserRole } from 'src/utils/user-role';
 import { QueryAppointmentsDto } from './dto/query-appointments.dto';
 import { IdParamDto } from 'src/utils/id.dto';
 import { UpdateAppointmentNotesDto } from './dto/update-appointment-notes.dto';
+import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller(`${URL_PREFIX}/appointments`)
@@ -106,6 +109,27 @@ export class AppointmentController {
       user.id,
       user.organizationId!,
     );
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.SECRETARY)
+  @Patch(':id')
+  async update(
+    @Req() req: Request,
+    @Param() param: IdParamDto,
+    @Body() dto: UpdateAppointmentDto,
+  ): Promise<AppointmentDto> {
+    const user = req.user as User;
+    return this.appointmentService.update(param.id, user.organizationId!, dto);
+  }
+
+  @Roles(UserRole.ADMIN, UserRole.SECRETARY)
+  @Delete(':id')
+  async delete(
+    @Req() req: Request,
+    @Param() param: IdParamDto,
+  ): Promise<void> {
+    const user = req.user as User;
+    return this.appointmentService.delete(param.id, user.organizationId!);
   }
 
   private formatQuery(query: QueryAppointmentsDto): void {

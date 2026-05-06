@@ -104,6 +104,23 @@ export class AppointmentDbService {
     });
     return appointment;
   }
+
+  async update(
+    appointmentId: number,
+    organizationId: number,
+    data: Prisma.AppointmentUpdateInput,
+  ): Promise<Appointment> {
+    return this.databaseService.appointment.update({
+      data,
+      where: { id: appointmentId, organizationId },
+    });
+  }
+
+  async delete(appointmentId: number, organizationId: number): Promise<void> {
+    await this.databaseService.appointment.delete({
+      where: { id: appointmentId, organizationId },
+    });
+  }
 }
 
 type AppointmentExtended = Appointment & {

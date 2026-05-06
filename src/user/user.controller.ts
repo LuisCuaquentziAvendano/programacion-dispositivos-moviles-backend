@@ -23,6 +23,7 @@ import { RolesGuard } from 'src/user/guards/roles.guard';
 import { UserRole } from 'src/utils/user-role';
 import { Roles } from './guards/roles.decorator';
 import { IdParamDto } from 'src/utils/id.dto';
+import { QueryUsersDto } from './dto/query-users.dto';
 
 @Controller(`${URL_PREFIX}/users`)
 export class UserController {
@@ -83,15 +84,9 @@ export class UserController {
   @Get()
   async getByQuery(
     @Req() req: Request,
-    @Query('query') query: string,
-    @Query('role') role: string,
+    @Query() query: QueryUsersDto,
   ): Promise<UserDto[]> {
     const user = req.user as User;
-    return this.userService.getByQuery(
-      query,
-      role,
-      user.id,
-      user.organizationId!,
-    );
+    return this.userService.getByQuery(query, user.id, user.organizationId!);
   }
 }

@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { PatientDbService } from 'src/database/patient-db.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { AppointmentDto, formatAppointment } from './dto/appointment.dto';
 import { AppointmentDbService } from 'src/database/appointment-db.service';
 import { UserDbService } from 'src/database/user-db.service';
@@ -159,6 +160,102 @@ export class AppointmentService {
     );
   }
 
+  async delete(
+    appointmentId: number,
+    organizationId: number,
+  ): Promise<void> {
+    const found = await this.appointmentDbService.getById(
+      appointmentId,
+      organizationId,
+    );
+    if (!found) throw new NotFoundException('Appointment not found');
+    await this.appointmentDbService.delete(appointmentId, organizationId);
+  }
+
+  async update(
+    appointmentId: number,
+    organizationId: number,
+    dto: UpdateAppointmentDto,
+  ): Promise<AppointmentDto> {
+    const existing = await this.appointmentDbService.getById(
+      appointmentId,
+      organizationId,
+    );
+    if (!existing) throw new NotFoundException('Appointment not found');
+
+    const resolvedPatientId = dto.patientId ?? existing.patientId;
+    const resolvedTherapistId = dto.therapistId ?? existing.therapistId;
+    const resolvedServiceId =
+      dto.serviceId !== undefined ? dto.serviceId : existing.serviceId;
+    const resolvedStartDate =
+      dto.startDate !== undefined ? new Date(dto.startDate) : existing.startDate;
+    const resolvedEndDate =
+      dto.endDate !== undefined ? new Date(dto.endDate) : existing.endDate;
+
+    if (resolvedStartDate >= resolvedEndDate)
+      throw new BadRequestException('Start date must be previous to end date');
+
+    const therapist = await this.userDbService.getByIdOrThrow(
+      resolvedTherapistId,
+      organizationId,
+    );
+    if (therapist.role !== UserRole.THERAPIST)
+      throw new BadRequestException('The user must be a therapist');
+
+    const patient = await this.patientDbService.getByIdOrThrow(
+      resolvedPatientId,
+      organizationId,
+    );
+    const service = resolvedServiceId
+      ? await this.serviceDbService.getByIdOrThrow(
+          resolvedServiceId,
+          organizationId,
+        )
+      : null;
+
+    // Check conflicts excluding the appointment being updated
+    await this.checkPatientScheduleConflictsExcluding(
+      appointmentId,
+      resolvedPatientId,
+      resolvedStartDate,
+      resolvedEndDate,
+      organizationId,
+    );
+    await this.checkTherapistScheduleConflictsExcluding(
+      appointmentId,
+      resolvedTherapistId,
+      resolvedStartDate,
+      resolvedEndDate,
+      organizationId,
+    );
+
+    const updated = await this.appointmentDbService.update(
+      appointmentId,
+      organizationId,
+      {
+        startDate: resolvedStartDate,
+        endDate: resolvedEndDate,
+        patient: { connect: { id: resolvedPatientId } },
+        therapist: { connect: { id: resolvedTherapistId } },
+        ...(resolvedServiceId
+          ? { service: { connect: { id: resolvedServiceId } } }
+          : { service: { disconnect: true } }),
+      },
+    );
+
+    const updatedFull = await this.appointmentDbService.getById(
+      updated.id,
+      organizationId,
+    );
+    if (!updatedFull) throw new NotFoundException('Appointment not found');
+    return formatAppointment(
+      updatedFull,
+      patient,
+      therapist,
+      service,
+    );
+  }
+
   private async checkPatientScheduleConflicts(
     appointmentData: CreateAppointmentDto,
     organizationId: number,
@@ -188,6 +285,46 @@ export class AppointmentService {
       rangeEnd: appointmentData.endDate,
     });
     if (therapistAppointments.length > 0)
+      throw new BadRequestException(
+        "There is a conflict in the therapist's schedule",
+      );
+  }
+
+  private async checkPatientScheduleConflictsExcluding(
+    excludeId: number,
+    patientId: number,
+    startDate: Date,
+    endDate: Date,
+    organizationId: number,
+  ): Promise<void> {
+    const conflicts = await this.appointmentDbService.getByQuery({
+      patientId,
+      therapistId: null,
+      organizationId,
+      rangeStart: startDate,
+      rangeEnd: endDate,
+    });
+    if (conflicts.some((a) => a.id !== excludeId))
+      throw new BadRequestException(
+        "There is a conflict in the patient's schedule",
+      );
+  }
+
+  private async checkTherapistScheduleConflictsExcluding(
+    excludeId: number,
+    therapistId: number,
+    startDate: Date,
+    endDate: Date,
+    organizationId: number,
+  ): Promise<void> {
+    const conflicts = await this.appointmentDbService.getByQuery({
+      patientId: null,
+      therapistId,
+      organizationId,
+      rangeStart: startDate,
+      rangeEnd: endDate,
+    });
+    if (conflicts.some((a) => a.id !== excludeId))
       throw new BadRequestException(
         "There is a conflict in the therapist's schedule",
       );

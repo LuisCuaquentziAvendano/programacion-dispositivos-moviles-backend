@@ -43,8 +43,8 @@ export class UserDbService {
   }
 
   async getByQuery(
-    query: string,
-    role: string,
+    query: string | undefined,
+    role: UserRole | undefined,
     userId: number,
     organizationId: number,
   ): Promise<User[]> {
@@ -54,7 +54,7 @@ export class UserDbService {
     };
     if (query)
       databaseQuery.OR = someFieldContainsQuery(['name', 'email'], query);
-    if (role) databaseQuery.role = role;
+    if (role !== undefined) databaseQuery.role = role;
     const users = await this.databaseService.user.findMany({
       where: databaseQuery,
     });

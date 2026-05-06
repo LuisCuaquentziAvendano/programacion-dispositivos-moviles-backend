@@ -4,6 +4,7 @@ import { User } from '@prisma/client';
 import { formatUser, UserDto } from './dto/user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { QueryUsersDto } from './dto/query-users.dto';
 import { getFirebaseAuth } from './firebase-admin';
 import { ConfigService } from '@nestjs/config';
 
@@ -24,14 +25,13 @@ export class UserService {
   }
 
   async getByQuery(
-    query: string,
-    role: string,
+    dto: QueryUsersDto,
     userId: number,
     organizationId: number,
   ): Promise<UserDto[]> {
     const users = await this.userDbService.getByQuery(
-      query,
-      role,
+      dto.query,
+      dto.role,
       userId,
       organizationId,
     );
