@@ -124,10 +124,7 @@ export class AppointmentController {
 
   @Roles(UserRole.ADMIN, UserRole.SECRETARY)
   @Delete(':id')
-  async delete(
-    @Req() req: Request,
-    @Param() param: IdParamDto,
-  ): Promise<void> {
+  async delete(@Req() req: Request, @Param() param: IdParamDto): Promise<void> {
     const user = req.user as User;
     return this.appointmentService.delete(param.id, user.organizationId!);
   }

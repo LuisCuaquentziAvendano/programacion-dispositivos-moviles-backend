@@ -160,10 +160,7 @@ export class AppointmentService {
     );
   }
 
-  async delete(
-    appointmentId: number,
-    organizationId: number,
-  ): Promise<void> {
+  async delete(appointmentId: number, organizationId: number): Promise<void> {
     const found = await this.appointmentDbService.getById(
       appointmentId,
       organizationId,
@@ -188,7 +185,9 @@ export class AppointmentService {
     const resolvedServiceId =
       dto.serviceId !== undefined ? dto.serviceId : existing.serviceId;
     const resolvedStartDate =
-      dto.startDate !== undefined ? new Date(dto.startDate) : existing.startDate;
+      dto.startDate !== undefined
+        ? new Date(dto.startDate)
+        : existing.startDate;
     const resolvedEndDate =
       dto.endDate !== undefined ? new Date(dto.endDate) : existing.endDate;
 
@@ -248,12 +247,7 @@ export class AppointmentService {
       organizationId,
     );
     if (!updatedFull) throw new NotFoundException('Appointment not found');
-    return formatAppointment(
-      updatedFull,
-      patient,
-      therapist,
-      service,
-    );
+    return formatAppointment(updatedFull, patient, therapist, service);
   }
 
   private async checkPatientScheduleConflicts(
