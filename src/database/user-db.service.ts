@@ -83,4 +83,17 @@ export class UserDbService {
     });
     return user;
   }
+
+  async update(id: number, data: Prisma.UserUpdateInput): Promise<User> {
+    return this.databaseService.user.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async delete(id: number): Promise<void> {
+    await this.databaseService.user.delete({
+      where: { id },
+    });
+  }
 }
