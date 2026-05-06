@@ -45,9 +45,11 @@ export class UserDbService {
   async getByQuery(
     query: string,
     role: string,
+    userId: number,
     organizationId: number,
   ): Promise<User[]> {
     const databaseQuery: Prisma.UserWhereInput = {
+      id: { not: userId },
       organizationId,
     };
     if (query)

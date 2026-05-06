@@ -26,11 +26,13 @@ export class UserService {
   async getByQuery(
     query: string,
     role: string,
+    userId: number,
     organizationId: number,
   ): Promise<UserDto[]> {
     const users = await this.userDbService.getByQuery(
       query,
       role,
+      userId,
       organizationId,
     );
     return users.map((user) => formatUser(user));

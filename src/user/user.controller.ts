@@ -87,6 +87,11 @@ export class UserController {
     @Query('role') role: string,
   ): Promise<UserDto[]> {
     const user = req.user as User;
-    return this.userService.getByQuery(query, role, user.organizationId!);
+    return this.userService.getByQuery(
+      query,
+      role,
+      user.id,
+      user.organizationId!,
+    );
   }
 }
